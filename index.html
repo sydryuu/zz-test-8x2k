@@ -248,6 +248,28 @@ body{
 .result-actions{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:26px;}
 .share-tip{font-size:13px;color:rgba(247,243,236,.55);letter-spacing:.1em;text-align:center;line-height:1.7;}
 
+/* 保存结果图 浮层 */
+.save-overlay{
+  position:fixed;inset:0;z-index:50;display:none;
+  background:rgba(8,7,7,.92);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:24px 16px 36px;
+}
+.save-overlay.show{display:block;}
+.save-inner{max-width:420px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.save-hint{
+  color:var(--gold-soft);font-size:15px;letter-spacing:.08em;text-align:center;line-height:1.7;
+  margin-top:4px;
+}
+.save-hint b{color:#fff;font-weight:600;}
+#saveImg{
+  width:100%;height:auto;border-radius:18px;
+  box-shadow:0 16px 50px rgba(0,0,0,.6);
+  display:block;
+}
+.save-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.save-actions a,.save-actions button{text-decoration:none;}
+
 @media (max-height:680px){
   .cover h1{font-size:36px;}
   .q-stem{font-size:22px;margin-bottom:26px;}
@@ -312,11 +334,24 @@ body{
     </div>
 
     <div class="result-actions">
-      <p class="share-tip">📸 长按截图，分享到群里<br>看看朋友们都是哪一型</p>
+      <button class="btn" id="saveBtn">保 存 结 果 图 片</button>
+      <p class="share-tip">点上方按钮生成专属结果图<br>长按图片保存到相册，发到群里</p>
       <button class="btn-ghost" id="retryBtn">再 测 一 次</button>
     </div>
   </section>
 
+</div>
+
+<!-- 保存结果图 浮层 -->
+<div class="save-overlay" id="saveOverlay">
+  <div class="save-inner">
+    <div class="save-hint" id="saveHint"><b>长按图片</b> → 保存到相册</div>
+    <img id="saveImg" alt="桌长十六型 · 我的酒桌人格">
+    <div class="save-actions">
+      <a class="btn-ghost" id="saveDownload" download="桌长十六型.png">下 载 图 片</a>
+      <button class="btn-ghost" id="saveClose">关 闭</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -505,7 +540,7 @@ function avatarSVG(code, size){
     '<circle cx="'+(cx-w*0.35)+'" cy="'+(cy+3*sc)+'" r="'+(1.6*sc)+'" fill="#fff" opacity=".85"/>';
   }
 
-  var s = '<svg class="avatar-svg" width="'+size+'" height="'+size+'" viewBox="0 0 200 200">';
+  var s = '<svg xmlns="http://www.w3.org/2000/svg" class="avatar-svg" width="'+size+'" height="'+size+'" viewBox="0 0 200 200">';
   s += '<defs><linearGradient id="cupg'+uid+'" x1="0" y1="0" x2="0" y2="1">'+
        '<stop offset="0" stop-color="'+goldL+'"/><stop offset="1" stop-color="'+goldD+'"/></linearGradient></defs>';
 
@@ -576,6 +611,7 @@ function avatarSVG(code, size){
 
 /* ============== 流程 ============== */
 var idx = 0;
+var currentCode = null;
 var counts = {D:0,C:0,B:0,T:0,E:0,S:0,H:0,N:0};
 
 var screens = {
@@ -672,6 +708,7 @@ function finish(){
     (counts.E >= counts.S ? 'E':'S') +
     (counts.H >= counts.N ? 'H':'N');
   var t = TYPES[code];
+  currentCode = code;   // 供"保存结果图"使用
 
   document.getElementById('cardMoonStage').innerHTML = avatarSVG(code, 168);
   document.getElementById('cardCode').textContent = code;
@@ -690,6 +727,152 @@ function finish(){
 document.getElementById('retryBtn').addEventListener('click', function(){
   show('cover');
 });
+
+/* ============== 保存结果图（纯 canvas 手绘，无外部库，微信兼容）============== */
+function renderResultCanvas(code, t){
+  return new Promise(function(resolve){
+    var S = Math.min(3, window.devicePixelRatio || 2); if(S < 2) S = 2;
+    var W = 660, M = 20, PAD = 44;
+    var cardX = M, cardW = W - 2*M;
+    var contentX = cardX + PAD, contentW = cardW - 2*PAD;
+    var INK='#0F0D0E', CREAM='#F7F3EC', GOLD='#C9A961', WINE='#4A0F14';
+    var serif = "'Noto Serif SC','Songti SC','STSong',serif";
+    var AV = 156, LH = 33, LOCKLH = 36;
+
+    // 量字 / 折行（CJK 按字断行）
+    var meas = document.createElement('canvas').getContext('2d');
+    function wrap(text, font, maxW){
+      meas.font = font;
+      var lines=[], line='';
+      for(var i=0;i<text.length;i++){
+        var ch=text[i], test=line+ch;
+        if(meas.measureText(test).width > maxW && line){ lines.push(line); line=ch; }
+        else line=test;
+      }
+      if(line) lines.push(line);
+      return lines;
+    }
+    var fText = "400 21px "+serif, fLock = "600 23px "+serif;
+    var pLines = wrap(t.portrait, fText, contentW-14);
+    var mLines = wrap(t.moment, fText, contentW-14);
+    var lLines = [t.lock+'，', '值得这更好的一杯。'];  // 固定两行，与卡片一致，避免孤字
+
+    // 收集绘制块（高度 + 画法），保证测高与绘制同步
+    var ops=[], yy = M + PAD;
+    function add(h, fn){ ops.push({y:yy, fn:fn}); yy += h; }
+
+    function lsText(ctx, str, cx, y, ls, color, font, align){
+      ctx.font=font; ctx.fillStyle=color; ctx.textAlign='left';
+      var ws=[], total=0;
+      for(var i=0;i<str.length;i++){ var w=ctx.measureText(str[i]).width; ws.push(w); total+=w+ls; }
+      total-=ls;
+      var sx = align==='center' ? cx-total/2 : cx;
+      for(var i=0;i<str.length;i++){ ctx.fillText(str[i], sx, y); sx+=ws[i]+ls; }
+      return total;
+    }
+
+    // 品牌头
+    add(34, function(ctx,y){
+      ctx.textAlign='left';
+      ctx.font="700 17px "+serif; var bw=ctx.measureText('五粮特曲').width;
+      ctx.font="400 13px "+serif; var sw=ctx.measureText('桌长十六型').width;
+      var gap=18, tw=bw+gap+sw, bx=W/2-tw/2;
+      ctx.font="700 17px "+serif; ctx.fillStyle=WINE; ctx.fillText('五粮特曲', bx, y+16);
+      ctx.strokeStyle='rgba(201,169,97,.6)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(bx+bw+gap/2, y+4); ctx.lineTo(bx+bw+gap/2, y+18); ctx.stroke();
+      ctx.font="400 13px "+serif; ctx.fillStyle='rgba(15,13,14,.45)'; ctx.fillText('桌长十六型', bx+bw+gap, y+15);
+    });
+    // 头像
+    add(AV+12, function(ctx,y){
+      if(AVIMG){ ctx.drawImage(AVIMG, W/2-AV/2, y, AV, AV); }
+      else { ctx.beginPath(); ctx.arc(W/2,y+AV/2,AV/2,0,Math.PI*2); ctx.fillStyle=GOLD; ctx.fill(); }
+    });
+    // 代号
+    add(28, function(ctx,y){ lsText(ctx, code, W/2, y+18, 7, GOLD, "italic 700 15px "+serif, 'center'); });
+    // 型名
+    add(50, function(ctx,y){ ctx.textAlign='center'; ctx.font="700 35px "+serif; ctx.fillStyle=WINE; ctx.fillText(t.name, W/2, y+34); });
+    // 四轴
+    add(24, function(ctx,y){ ctx.textAlign='center'; ctx.font="400 13px "+serif; ctx.fillStyle='rgba(15,13,14,.5)'; ctx.fillText(t.axes, W/2, y+14); });
+    add(18, function(){});
+    // 一句话画像
+    add(24, function(ctx,y){ secLabel(ctx,'一句话画像',y); });
+    add(pLines.length*LH+10, function(ctx,y){ textBlock(ctx,pLines,y); });
+    // 标志性饭桌时刻
+    add(24, function(ctx,y){ secLabel(ctx,'标志性饭桌时刻',y); });
+    add(mLines.length*LH+12, function(ctx,y){ textBlock(ctx,mLines,y); });
+    // 锁尾句
+    add(20, function(ctx,y){ ctx.strokeStyle='rgba(201,169,97,.45)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(contentX,y+10); ctx.lineTo(contentX+contentW,y+10); ctx.stroke(); });
+    add(lLines.length*LOCKLH+8, function(ctx,y){
+      ctx.textAlign='center'; ctx.font="600 23px "+serif; ctx.fillStyle=WINE;
+      for(var i=0;i<lLines.length;i++) ctx.fillText(lLines[i], W/2, y+24+i*LOCKLH);
+    });
+    // 五种粮金点
+    add(22, function(ctx,y){
+      var n=5, gw=10, cx0=W/2-((n-1)*gw)/2;
+      for(var i=0;i<n;i++){ ctx.beginPath(); ctx.ellipse(cx0+i*gw, y+8, 2.6, 3.6, 0,0,Math.PI*2); ctx.fillStyle=GOLD; ctx.fill(); }
+    });
+    // 落款
+    add(24, function(ctx,y){ lsText(ctx,'五粮成酒 · 一桌成圆', W/2, y+12, 5, 'rgba(15,13,14,.45)', "400 13px "+serif, 'center'); });
+
+    function secLabel(ctx, text, y){
+      ctx.fillStyle=GOLD; ctx.fillRect(contentX, y, 3, 16);
+      lsText(ctx, text, contentX+12, y+13, 4, GOLD, "600 12px "+serif, 'left');
+    }
+    function textBlock(ctx, lines, y){
+      ctx.textAlign='left'; ctx.font="400 21px "+serif; ctx.fillStyle='rgba(15,13,14,.86)';
+      for(var i=0;i<lines.length;i++) ctx.fillText(lines[i], contentX+13, y+22+i*LH);
+    }
+
+    var cardBottom = yy + PAD, H = cardBottom + M;
+
+    // 头像先转成图片（纯内联 SVG，不会污染画布）
+    var AVIMG = null;
+    function paint(){
+      var cv=document.createElement('canvas'); cv.width=W*S; cv.height=H*S;
+      var ctx=cv.getContext('2d'); ctx.scale(S,S); ctx.textBaseline='alphabetic';
+      // 深底 + 顶部金辉
+      ctx.fillStyle=INK; ctx.fillRect(0,0,W,H);
+      var rg=ctx.createRadialGradient(W/2,0,0,W/2,0,W*0.75);
+      rg.addColorStop(0,'rgba(201,169,97,.16)'); rg.addColorStop(1,'rgba(15,13,14,0)');
+      ctx.fillStyle=rg; ctx.fillRect(0,0,W,H*0.55);
+      // 卡片
+      function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+      rr(cardX, M, cardW, cardBottom-M, 26); ctx.fillStyle=CREAM; ctx.fill();
+      ctx.lineWidth=1.5; ctx.strokeStyle='rgba(201,169,97,.5)'; ctx.stroke();
+      ctx.save(); rr(cardX,M,cardW,cardBottom-M,26); ctx.clip();
+      ctx.beginPath(); ctx.arc(cardX+cardW, M, 80,0,Math.PI*2); ctx.lineWidth=1; ctx.strokeStyle='rgba(201,169,97,.45)'; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cardX, cardBottom, 90,0,Math.PI*2); ctx.strokeStyle='rgba(74,15,20,.16)'; ctx.stroke();
+      ctx.restore();
+      // 内容
+      ops.forEach(function(o){ o.fn(ctx, o.y); });
+      resolve(cv);
+    }
+    var img=new Image();
+    img.onload=function(){ AVIMG=img; paint(); };
+    img.onerror=function(){ AVIMG=null; paint(); };
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(avatarSVG(code,200));
+  });
+}
+
+(function(){
+  var saveBtn=document.getElementById('saveBtn'), overlay=document.getElementById('saveOverlay');
+  var img=document.getElementById('saveImg'), dl=document.getElementById('saveDownload');
+  saveBtn.addEventListener('click', function(){
+    if(!currentCode) return;
+    saveBtn.disabled=true; saveBtn.textContent='生 成 中…';
+    renderResultCanvas(currentCode, TYPES[currentCode]).then(function(cv){
+      var url=cv.toDataURL('image/png');
+      img.src=url; dl.href=url;
+      overlay.classList.add('show');
+      saveBtn.disabled=false; saveBtn.textContent='保 存 结 果 图 片';
+    }).catch(function(){
+      saveBtn.disabled=false; saveBtn.textContent='保 存 结 果 图 片';
+      alert('生成失败了，可长按上方结果卡截图保存');
+    });
+  });
+  document.getElementById('saveClose').addEventListener('click', function(){ overlay.classList.remove('show'); });
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.classList.remove('show'); });
+})();
 
 /* ============== 星空背景 ============== */
 (function(){
