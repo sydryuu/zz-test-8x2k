@@ -10,13 +10,13 @@
 <!-- ===== 分享用 OG / 社交卡片 meta（缩略图为占位，替换 og-cover.png 即可）===== -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="五粮特曲 · 桌长十六型｜酒桌人格测试">
-<meta property="og:description" content="8 道题，测出你是哪一型酒桌人格。从「酒桌话事人」到「第一次主桌不知所措的我」，看看朋友们都是谁。">
+<meta property="og:description" content="12 道题，测出你是哪一型酒桌人格。从「酒桌话事人」到「第一次主桌不知所措的我」，看看朋友们都是谁。">
 <meta property="og:image" content="./og-cover.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="五粮特曲 · 桌长十六型｜酒桌人格测试">
-<meta name="twitter:description" content="8 道题，测出你是哪一型酒桌人格。">
+<meta name="twitter:description" content="12 道题，测出你是哪一型酒桌人格。">
 <meta name="twitter:image" content="./og-cover.png">
 
 <style>
@@ -96,8 +96,8 @@ body{
 
 /* 品牌字标 + 五种粮金点 + slogan */
 .brandmark{
-  font-size:15px;letter-spacing:.5em;color:var(--gold);padding-left:.5em;
-  margin-bottom:14px;font-weight:600;
+  font-size:15px;letter-spacing:.12em;color:var(--gold);padding-left:.12em;
+  margin-bottom:16px;font-weight:600;
   text-shadow:0 0 16px rgba(201,169,97,.5);
 }
 .grains{display:flex;justify-content:center;align-items:center;gap:9px;margin:0 auto 26px;}
@@ -201,15 +201,15 @@ body{
   border:1px solid rgba(74,15,20,.18);border-radius:50%;
 }
 .card-brand{
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  margin-bottom:6px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  margin-bottom:8px;
 }
 .card-brand span{
-  font-size:14px;font-weight:700;letter-spacing:.28em;color:var(--wine);padding-left:.28em;
+  font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--wine);
 }
 .card-brand em{
   font-style:normal;font-size:11px;letter-spacing:.24em;color:rgba(15,13,14,.45);
-  border-left:1px solid rgba(201,169,97,.6);padding-left:10px;
+  padding-left:.24em;
 }
 .card-moon{display:flex;justify-content:center;margin-bottom:6px;}
 .avatar-svg{filter:drop-shadow(0 8px 16px rgba(74,15,20,.22));}
@@ -285,12 +285,11 @@ body{
   <!-- 封面 -->
   <section class="screen active" id="cover">
     <div class="cover-moon moon-stage" id="coverMoonStage"></div>
-    <div class="brandmark">五 粮 特 曲</div>
-    <div class="kicker">月 下 有 光 · 桌长十六型</div>
+    <div class="brandmark">五粮特曲 · 更好的特曲给更好的你</div>
     <h1>桌长十六型</h1>
     <div class="sub">酒 桌 人 格 测 试</div>
     <div class="grains" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    <p class="desc">一桌人围坐，谁张罗、谁善听、谁守规矩、谁爱整新花样？<br>8 道题，测出你是哪一型酒桌人格，<br>领走专属于你的那一杯。</p>
+    <p class="desc">一桌人围坐，谁张罗、谁善听、谁守规矩、谁爱整新花样？<br>12 道题，测出你是哪一型酒桌人格，<br>领走专属于你的那一杯。</p>
     <button class="btn" id="startBtn">开 始 测 试</button>
     <div class="cover-slogan">五粮成酒 · 一桌成圆</div>
   </section>
@@ -316,7 +315,7 @@ body{
       <div class="hint">你 的 酒 桌 人 格 是</div>
     </div>
     <div class="card" id="card">
-      <div class="card-brand"><span>五粮特曲</span><em>桌长十六型</em></div>
+      <div class="card-brand"><span>五粮特曲 · 更好的特曲给更好的你</span><em>桌长十六型</em></div>
       <div class="card-moon moon-stage" id="cardMoonStage"></div>
       <div class="card-code" id="cardCode">DBEH</div>
       <div class="card-name" id="cardName"></div>
@@ -609,6 +608,88 @@ function avatarSVG(code, size){
   return s;
 }
 
+/* 头像的原生 canvas 版本（与 avatarSVG 同款，用于保存图片，iOS/微信稳定）*/
+function drawAvatar(ctx, code, ox, oy, size){
+  var p=code.split(''); var dAx=p[0],tAx=p[1],eAx=p[2],hAx=p[3];
+  var cloth=CLOTH[code]||'#4A0F14';
+  var skin='#F1D3A9',hair='#2A2018',gold='#C9A961',goldL='#F0E0B0',goldD='#A8893F',wine='#4A0F14';
+  ctx.save(); ctx.translate(ox,oy); ctx.scale(size/200,size/200); ctx.lineJoin='round';
+
+  function circle(cx,cy,r,fill,strokeC,lw,alpha){
+    ctx.globalAlpha=alpha==null?1:alpha; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    if(fill){ctx.fillStyle=fill;ctx.fill();}
+    if(strokeC){ctx.lineWidth=lw;ctx.strokeStyle=strokeC;ctx.stroke();}
+    ctx.globalAlpha=1;
+  }
+  function ellipse(cx,cy,rx,ry,fill,alpha){
+    ctx.globalAlpha=alpha==null?1:alpha; ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+    ctx.fillStyle=fill; ctx.fill(); ctx.globalAlpha=1;
+  }
+  function rrect(x,y,w,h,r,fill){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.fillStyle=fill; ctx.fill(); }
+  function cup(cx,cy,sc){
+    var w=10*sc,bh=13*sc,st=9*sc;
+    var g=ctx.createLinearGradient(cx,cy,cx,cy+bh); g.addColorStop(0,goldL); g.addColorStop(1,goldD);
+    ctx.beginPath(); ctx.moveTo(cx-w,cy); ctx.lineTo(cx+w,cy); ctx.lineTo(cx+w*0.62,cy+bh); ctx.quadraticCurveTo(cx,cy+bh+3*sc,cx-w*0.62,cy+bh); ctx.closePath();
+    ctx.fillStyle=g; ctx.fill(); ctx.lineWidth=1; ctx.strokeStyle=goldD; ctx.stroke();
+    ctx.globalAlpha=.8; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(cx-w*0.78,cy+3*sc); ctx.quadraticCurveTo(cx,cy+8*sc,cx+w*0.78,cy+3*sc); ctx.lineWidth=2.4*sc; ctx.strokeStyle=wine; ctx.stroke(); ctx.lineCap='butt'; ctx.globalAlpha=1;
+    ctx.fillStyle=goldD; ctx.fillRect(cx-1.4*sc, cy+bh, 2.8*sc, st*0.7);
+    ellipse(cx, cy+bh+st*0.7, 7*sc, 2.2*sc, gold);
+    circle(cx-w*0.35, cy+3*sc, 1.6*sc, '#fff', null, null, .85);
+  }
+
+  // 背景盘 + 金环
+  circle(100,100,93,'rgba(247,243,236,0.05)');
+  circle(100,100,93,null,gold,1.4,.45);
+  // 肩
+  ctx.beginPath(); ctx.moveTo(40,172); ctx.quadraticCurveTo(44,122,100,120); ctx.quadraticCurveTo(156,122,160,172); ctx.closePath(); ctx.fillStyle=cloth; ctx.fill();
+  // 领口
+  if(hAx==='H'){
+    ctx.beginPath(); ctx.moveTo(88,122); ctx.lineTo(88,150); ctx.quadraticCurveTo(100,158,112,150); ctx.lineTo(112,122); ctx.closePath(); ctx.fillStyle=cloth; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=gold; ctx.stroke();
+    circle(100,134,2.6,gold); circle(100,146,2.6,gold);
+  } else {
+    ctx.beginPath(); ctx.moveTo(84,121); ctx.quadraticCurveTo(100,140,116,121); ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.stroke();
+  }
+  // 脖子 + 耳 + 头
+  rrect(92,104,16,18,6,skin);
+  circle(64,84,6,skin); circle(136,84,6,skin); circle(100,80,36,skin);
+  // 头发
+  ctx.beginPath(); ctx.moveTo(62,72); ctx.quadraticCurveTo(60,40,100,38); ctx.quadraticCurveTo(140,40,138,72); ctx.quadraticCurveTo(120,56,100,56); ctx.quadraticCurveTo(80,56,62,72); ctx.closePath(); ctx.fillStyle=hair; ctx.fill();
+  if(hAx==='N'){ ctx.beginPath(); ctx.moveTo(60,68); ctx.quadraticCurveTo(92,46,140,66); ctx.quadraticCurveTo(112,52,60,68); ctx.closePath(); ctx.fillStyle=hair; ctx.fill(); }
+  // 眼
+  if(eAx==='E'){
+    ctx.strokeStyle=hair; ctx.lineWidth=3.6; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(82,80); ctx.quadraticCurveTo(89,72,96,80); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(104,80); ctx.quadraticCurveTo(111,72,118,80); ctx.stroke();
+    ctx.lineCap='butt';
+  } else {
+    circle(90,82,3.8,hair); circle(110,82,3.8,hair);
+    circle(91.2,83.2,1.1,'#fff',null,null,.8); circle(111.2,83.2,1.1,'#fff',null,null,.8);
+  }
+  // 腮红
+  var ba=eAx==='E'?0.55:0.26;
+  ellipse(76,92,8,5,'#D87A6E',ba); ellipse(124,92,8,5,'#D87A6E',ba);
+  // 嘴
+  if(tAx==='B'){ ellipse(100,98,6.5,8,'#8A2A28'); ellipse(100,101,3.6,2.6,'#D86A66'); }
+  else { ctx.strokeStyle='#7A3A36'; ctx.lineWidth=3.4; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(90,97); ctx.quadraticCurveTo(100,105,110,97); ctx.stroke(); ctx.lineCap='butt'; }
+  // 头饰
+  if(hAx==='H'){
+    ctx.beginPath(); ctx.moveTo(62,60); ctx.quadraticCurveTo(100,24,138,60); ctx.quadraticCurveTo(100,46,62,60); ctx.closePath(); ctx.fillStyle=wine; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(62,60); ctx.quadraticCurveTo(100,46,138,60); ctx.lineWidth=3; ctx.strokeStyle=gold; ctx.stroke();
+    circle(100,33,5.5,gold);
+  } else {
+    circle(90,81,12,null,goldD,2.4); circle(110,81,12,null,goldD,2.4);
+    ctx.beginPath(); ctx.moveTo(102,81); ctx.lineTo(98,81); ctx.lineWidth=2.4; ctx.strokeStyle=goldD; ctx.stroke();
+  }
+  // 手 + 杯
+  if(dAx==='D'){
+    ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(150,168); ctx.quadraticCurveTo(174,130,156,94); ctx.lineWidth=17; ctx.strokeStyle=cloth; ctx.stroke(); ctx.lineCap='butt';
+    circle(156,92,9,skin); cup(156,66,0.95);
+  } else {
+    cup(100,144,1.05); circle(85,152,9,skin); circle(115,152,9,skin);
+  }
+  ctx.restore();
+}
+
 /* ============== 流程 ============== */
 var idx = 0;
 var currentCode = null;
@@ -771,22 +852,15 @@ function renderResultCanvas(code, t){
       return total;
     }
 
-    // 品牌头
-    add(34, function(ctx,y){
-      ctx.textAlign='left';
-      ctx.font="700 17px "+serif; var bw=ctx.measureText('五粮特曲').width;
-      ctx.font="400 13px "+serif; var sw=ctx.measureText('桌长十六型').width;
-      var gap=18, tw=bw+gap+sw, bx=W/2-tw/2;
-      ctx.font="700 17px "+serif; ctx.fillStyle=WINE; ctx.fillText('五粮特曲', bx, y+16);
-      ctx.strokeStyle='rgba(201,169,97,.6)'; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.moveTo(bx+bw+gap/2, y+4); ctx.lineTo(bx+bw+gap/2, y+18); ctx.stroke();
-      ctx.font="400 13px "+serif; ctx.fillStyle='rgba(15,13,14,.45)'; ctx.fillText('桌长十六型', bx+bw+gap, y+15);
+    // 品牌头（slogan + 桌长十六型 两行）
+    add(48, function(ctx,y){
+      ctx.textAlign='center';
+      ctx.font="700 16px "+serif; ctx.fillStyle=WINE;
+      ctx.fillText('五粮特曲 · 更好的特曲给更好的你', W/2, y+16);
+      lsText(ctx, '桌长十六型', W/2, y+35, 4, 'rgba(15,13,14,.45)', "400 12px "+serif, 'center');
     });
-    // 头像
-    add(AV+12, function(ctx,y){
-      if(AVIMG){ ctx.drawImage(AVIMG, W/2-AV/2, y, AV, AV); }
-      else { ctx.beginPath(); ctx.arc(W/2,y+AV/2,AV/2,0,Math.PI*2); ctx.fillStyle=GOLD; ctx.fill(); }
-    });
+    // 头像（原生 canvas 手绘，微信/iOS 必现）
+    add(AV+12, function(ctx,y){ drawAvatar(ctx, code, W/2-AV/2, y, AV); });
     // 代号
     add(28, function(ctx,y){ lsText(ctx, code, W/2, y+18, 7, GOLD, "italic 700 15px "+serif, 'center'); });
     // 型名
@@ -825,8 +899,6 @@ function renderResultCanvas(code, t){
 
     var cardBottom = yy + PAD, H = cardBottom + M;
 
-    // 头像先转成图片（纯内联 SVG，不会污染画布）
-    var AVIMG = null;
     function paint(){
       var cv=document.createElement('canvas'); cv.width=W*S; cv.height=H*S;
       var ctx=cv.getContext('2d'); ctx.scale(S,S); ctx.textBaseline='alphabetic';
@@ -847,10 +919,7 @@ function renderResultCanvas(code, t){
       ops.forEach(function(o){ o.fn(ctx, o.y); });
       resolve(cv);
     }
-    var img=new Image();
-    img.onload=function(){ AVIMG=img; paint(); };
-    img.onerror=function(){ AVIMG=null; paint(); };
-    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(avatarSVG(code,200));
+    paint();   // 全程同步绘制，无需等待外部图片加载
   });
 }
 
