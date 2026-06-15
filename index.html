@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>桌长十六型 · 酒桌人格测试</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+
+<!-- ===== 分享用 OG / 社交卡片 meta（缩略图为占位，替换 og-cover.png 即可）===== -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="五粮特曲 · 桌长十六型｜酒桌人格测试">
+<meta property="og:description" content="8 道题，测出你是哪一型酒桌人格。从「酒桌话事人」到「第一次主桌不知所措的我」，看看朋友们都是谁。">
+<meta property="og:image" content="./og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="五粮特曲 · 桌长十六型｜酒桌人格测试">
+<meta name="twitter:description" content="8 道题，测出你是哪一型酒桌人格。">
+<meta name="twitter:image" content="./og-cover.png">
+
+<style>
+:root{
+  --ink:#0F0D0E;        /* 深墨底 */
+  --ink-2:#17141500;
+  --cream:#F7F3EC;      /* 暖米白卡片 */
+  --gold:#C9A961;       /* 金色月亮 */
+  --gold-soft:#E2C988;
+  --wine:#4A0F14;       /* 酒红 CTA */
+  --wine-2:#6E1A22;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:"Noto Serif SC","Noto Serif CJK SC","Source Han Serif SC","Songti SC","STSong",serif;
+  background:var(--ink);
+  color:var(--cream);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* 背景：深墨 + 顶部月光辉光 */
+.bg{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(201,169,97,.18) 0%, rgba(201,169,97,.05) 28%, rgba(15,13,14,0) 55%),
+    radial-gradient(100% 120% at 50% 120%, rgba(74,15,20,.45) 0%, rgba(15,13,14,0) 60%),
+    var(--ink);
+}
+.stars{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+
+.wrap{
+  position:relative;z-index:1;
+  min-height:100%;
+  max-width:480px;margin:0 auto;
+  padding:env(safe-area-inset-top) 22px env(safe-area-inset-bottom);
+  display:flex;flex-direction:column;
+}
+
+/* ===== 通用屏幕切换 ===== */
+.screen{
+  display:none;
+  flex:1;flex-direction:column;
+  padding:24px 0 36px;
+  opacity:0;transform:translateY(18px);
+  transition:opacity .5s ease,transform .5s ease;
+}
+.screen.active{display:flex;}
+.screen.shown{opacity:1;transform:translateY(0);}
+
+/* ===== 月亮 ===== */
+.moon-stage{display:flex;justify-content:center;align-items:center;}
+.moon-svg{filter:drop-shadow(0 0 22px rgba(201,169,97,.45));}
+
+/* ===== 封面 ===== */
+#cover{justify-content:center;text-align:center;align-items:center;}
+.cover-moon{margin-bottom:10px;}
+.kicker{
+  font-size:13px;letter-spacing:.42em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:18px;padding-left:.42em;
+  font-family:"Spectral","Noto Serif SC",serif;font-style:italic;
+}
+.cover h1{
+  font-size:42px;font-weight:600;line-height:1.18;letter-spacing:.04em;
+  margin-bottom:6px;
+  background:linear-gradient(180deg,#fff 0%,var(--gold-soft) 120%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.cover .sub{font-size:16px;color:rgba(247,243,236,.7);letter-spacing:.2em;margin-bottom:30px;}
+.cover .desc{
+  font-size:15px;line-height:1.9;color:rgba(247,243,236,.62);
+  max-width:300px;margin:0 auto 38px;
+}
+.divider{width:46px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 30px;}
+
+/* 品牌字标 + 五种粮金点 + slogan */
+.brandmark{
+  font-size:15px;letter-spacing:.5em;color:var(--gold);padding-left:.5em;
+  margin-bottom:14px;font-weight:600;
+  text-shadow:0 0 16px rgba(201,169,97,.5);
+}
+.grains{display:flex;justify-content:center;align-items:center;gap:9px;margin:0 auto 26px;}
+.grains i{
+  width:6px;height:8px;border-radius:50% 50% 48% 48%/60% 60% 40% 40%;
+  background:linear-gradient(180deg,var(--gold-soft),var(--gold));
+  transform:rotate(-8deg);box-shadow:0 0 6px rgba(201,169,97,.4);
+  display:inline-block;
+}
+.grains i:nth-child(2){transform:rotate(6deg);}
+.grains i:nth-child(4){transform:rotate(6deg);}
+.grains i:nth-child(3){transform:rotate(-3deg) scale(1.08);}
+.cover-slogan{
+  margin-top:24px;font-size:14px;letter-spacing:.34em;padding-left:.34em;
+  color:rgba(201,169,97,.85);
+}
+
+/* ===== 按钮 ===== */
+.btn{
+  display:inline-block;border:none;cursor:pointer;
+  font-family:inherit;font-size:17px;font-weight:600;letter-spacing:.16em;
+  color:var(--cream);
+  background:linear-gradient(135deg,var(--wine-2),var(--wine));
+  padding:16px 46px;border-radius:40px;
+  box-shadow:0 10px 30px rgba(74,15,20,.55),inset 0 1px 0 rgba(255,255,255,.12);
+  position:relative;overflow:hidden;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.btn:active{transform:scale(.97);}
+.btn::after{
+  content:"";position:absolute;inset:0;border-radius:40px;
+  border:1px solid rgba(201,169,97,.45);
+}
+.btn-ghost{
+  background:transparent;color:var(--gold);box-shadow:none;
+  border:1px solid rgba(201,169,97,.4);padding:13px 34px;font-size:15px;
+}
+.btn-ghost::after{display:none;}
+
+/* ===== 答题区 ===== */
+.q-head{display:flex;flex-direction:column;align-items:center;margin-bottom:6px;}
+.q-moon{margin-bottom:8px;}
+.q-counter{font-size:13px;letter-spacing:.3em;color:var(--gold);font-family:"Spectral",serif;font-style:italic;}
+.q-axis{font-size:12px;letter-spacing:.34em;color:rgba(247,243,236,.4);margin-top:4px;}
+
+.q-body{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.q-stem{
+  font-size:25px;font-weight:600;line-height:1.5;letter-spacing:.02em;
+  text-align:center;margin:8px 4px 34px;
+  color:#fff;
+}
+.opt{
+  display:block;width:100%;text-align:left;cursor:pointer;
+  font-family:inherit;font-size:17px;line-height:1.6;letter-spacing:.02em;
+  color:var(--ink);
+  background:var(--cream);
+  border:none;border-radius:18px;
+  padding:20px 22px;margin-bottom:16px;
+  position:relative;
+  box-shadow:0 6px 20px rgba(0,0,0,.3);
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.opt:active{transform:scale(.985);}
+.opt.pick{background:var(--gold);box-shadow:0 8px 26px rgba(201,169,97,.5);}
+.opt .tag{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--wine);color:var(--cream);
+  font-size:14px;font-weight:600;margin-right:12px;vertical-align:-5px;
+  font-family:"Spectral",serif;
+}
+.opt.pick .tag{background:var(--ink);color:var(--gold);}
+
+/* 题目过渡 */
+.q-fade{transition:opacity .32s ease,transform .32s ease;}
+.q-fade.out{opacity:0;transform:translateY(-14px);}
+.q-fade.in-prep{opacity:0;transform:translateY(16px);}
+
+/* ===== 结果卡 ===== */
+#result{padding-top:14px;}
+.result-head{text-align:center;margin-bottom:18px;}
+.result-head .hint{font-size:12px;letter-spacing:.3em;color:rgba(247,243,236,.5);}
+
+.card{
+  background:
+    radial-gradient(130% 60% at 50% 0%, rgba(201,169,97,.14), rgba(247,243,236,0) 60%),
+    var(--cream);
+  color:var(--ink);
+  border-radius:24px;
+  padding:34px 28px 30px;
+  position:relative;overflow:hidden;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+  border:1px solid rgba(201,169,97,.5);
+}
+.card::before{ /* 角部弧线 motif */
+  content:"";position:absolute;top:-60px;right:-60px;width:150px;height:150px;
+  border:1px solid rgba(201,169,97,.5);border-radius:50%;
+}
+.card::after{
+  content:"";position:absolute;bottom:-70px;left:-70px;width:170px;height:170px;
+  border:1px solid rgba(74,15,20,.18);border-radius:50%;
+}
+.card-brand{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:6px;
+}
+.card-brand span{
+  font-size:14px;font-weight:700;letter-spacing:.28em;color:var(--wine);padding-left:.28em;
+}
+.card-brand em{
+  font-style:normal;font-size:11px;letter-spacing:.24em;color:rgba(15,13,14,.45);
+  border-left:1px solid rgba(201,169,97,.6);padding-left:10px;
+}
+.card-moon{display:flex;justify-content:center;margin-bottom:6px;}
+.avatar-svg{filter:drop-shadow(0 8px 16px rgba(74,15,20,.22));}
+.card-grains{display:flex;justify-content:center;gap:8px;margin:16px auto 12px;}
+.card-grains i{
+  width:5px;height:7px;border-radius:50% 50% 48% 48%/60% 60% 40% 40%;
+  background:var(--gold);transform:rotate(-8deg);display:inline-block;
+}
+.card-grains i:nth-child(2),.card-grains i:nth-child(4){transform:rotate(6deg);}
+.card-grains i:nth-child(3){transform:scale(1.1);}
+.card-code{
+  text-align:center;font-family:"Spectral",serif;font-style:italic;
+  letter-spacing:.42em;font-size:14px;color:var(--gold);
+  padding-left:.42em;margin-bottom:8px;
+}
+.card-name{
+  text-align:center;font-size:34px;font-weight:700;letter-spacing:.04em;
+  color:var(--wine);line-height:1.2;margin-bottom:4px;
+}
+.card-axes{text-align:center;font-size:12px;letter-spacing:.16em;color:rgba(15,13,14,.5);margin-bottom:22px;}
+.sec{margin-bottom:20px;}
+.sec-label{
+  font-size:11px;letter-spacing:.34em;color:var(--gold);
+  border-left:3px solid var(--gold);padding-left:10px;margin-bottom:9px;
+  font-weight:600;
+}
+.sec-text{font-size:16px;line-height:1.85;color:rgba(15,13,14,.86);padding-left:13px;}
+.lock{
+  margin-top:24px;text-align:center;
+  font-size:18px;font-weight:600;line-height:1.6;color:var(--wine);
+  padding:18px 10px 4px;
+  border-top:1px solid rgba(201,169,97,.45);
+}
+.lock .small{display:block;font-size:13px;color:rgba(15,13,14,.45);letter-spacing:.3em;margin-top:14px;font-weight:400;}
+
+.result-actions{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:26px;}
+.share-tip{font-size:13px;color:rgba(247,243,236,.55);letter-spacing:.1em;text-align:center;line-height:1.7;}
+
+@media (max-height:680px){
+  .cover h1{font-size:36px;}
+  .q-stem{font-size:22px;margin-bottom:26px;}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<canvas class="stars" id="stars"></canvas>
+
+<div class="wrap">
+
+  <!-- 封面 -->
+  <section class="screen active" id="cover">
+    <div class="cover-moon moon-stage" id="coverMoonStage"></div>
+    <div class="brandmark">五 粮 特 曲</div>
+    <div class="kicker">月 下 有 光 · 桌长十六型</div>
+    <h1>桌长十六型</h1>
+    <div class="sub">酒 桌 人 格 测 试</div>
+    <div class="grains" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="desc">一桌人围坐，谁张罗、谁善听、谁守规矩、谁爱整新花样？<br>8 道题，测出你是哪一型酒桌人格，<br>领走专属于你的那一杯。</p>
+    <button class="btn" id="startBtn">开 始 测 试</button>
+    <div class="cover-slogan">五粮成酒 · 一桌成圆</div>
+  </section>
+
+  <!-- 答题 -->
+  <section class="screen" id="quiz">
+    <div class="q-head">
+      <div class="q-moon moon-stage" id="quizMoonStage"></div>
+      <div class="q-counter" id="qCounter">01 / 08</div>
+      <div class="q-axis" id="qAxis"></div>
+    </div>
+    <div class="q-body">
+      <div class="q-fade" id="qFade">
+        <div class="q-stem" id="qStem"></div>
+        <button class="opt" id="optA"><span class="tag">A</span><span class="opt-t"></span></button>
+        <button class="opt" id="optB"><span class="tag">B</span><span class="opt-t"></span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 结果 -->
+  <section class="screen" id="result">
+    <div class="result-head">
+      <div class="hint">你 的 酒 桌 人 格 是</div>
+    </div>
+    <div class="card" id="card">
+      <div class="card-brand"><span>五粮特曲</span><em>桌长十六型</em></div>
+      <div class="card-moon moon-stage" id="cardMoonStage"></div>
+      <div class="card-code" id="cardCode">DBEH</div>
+      <div class="card-name" id="cardName"></div>
+      <div class="card-axes" id="cardAxes"></div>
+
+      <div class="sec">
+        <div class="sec-label">一 句 话 画 像</div>
+        <div class="sec-text" id="cardPortrait"></div>
+      </div>
+      <div class="sec">
+        <div class="sec-label">标 志 性 饭 桌 时 刻</div>
+        <div class="sec-text" id="cardMoment"></div>
+      </div>
+      <div class="lock" id="cardLock"></div>
+    </div>
+
+    <div class="result-actions">
+      <p class="share-tip">📸 长按截图，分享到群里<br>看看朋友们都是哪一型</p>
+      <button class="btn-ghost" id="retryBtn">再 测 一 次</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============== 数据 ============== */
+var QUESTIONS = [
+  { axis:"张罗 / 安坐", stem:"一桌人刚坐下，气氛还有点僵——",
+    a:{t:"我先开口招呼大家，张罗着倒酒上菜", v:"D"},
+    b:{t:"我等别人起头，安安静静先坐着", v:"C"} },
+  { axis:"张罗 / 安坐", stem:"席间有人杯子空了——",
+    a:{t:"我眼疾手快马上给续上，顺便招呼一圈", v:"D"},
+    b:{t:"我注意到了，但一般等主人来添", v:"C"} },
+  { axis:"健言 / 善听", stem:"轮到我说祝酒词——",
+    a:{t:"张口就来，想到啥说啥，图个痛快", v:"B"},
+    b:{t:"我会先想想措辞，照顾到在场每个人", v:"T"} },
+  { axis:"健言 / 善听", stem:"旁边的人喝多了开始说胡话——",
+    a:{t:"我直接怼回去，有啥说啥", v:"B"},
+    b:{t:"我打个圆场，悄悄把话题岔开", v:"T"} },
+  { axis:"敬人 / 自品", stem:"一场饭局下来，我最在意的是——",
+    a:{t:"大家聊得开不开心、谁今天情绪不对", v:"E"},
+    b:{t:"这顿饭办成了没、该敬的人敬到没", v:"S"} },
+  { axis:"敬人 / 自品", stem:"饭局上有人闹了点小别扭——",
+    a:{t:"我心里一直惦记着，想找机会缓和", v:"E"},
+    b:{t:"这是小事，把整桌的局面顾好更重要", v:"S"} },
+  { axis:"念旧 / 尝新", stem:"说到酒桌规矩——",
+    a:{t:"长幼有序、先敬长辈，老规矩该守还得守", v:"H"},
+    b:{t:"规矩是死的人是活的，开心最重要", v:"N"} },
+  { axis:"念旧 / 尝新", stem:"让我组个局，我会——",
+    a:{t:"找家有年代感的老馆子，按老路子来", v:"H"},
+    b:{t:"整点新花样，密室、围炉、露营都行", v:"N"} }
+];
+
+var TYPES = {
+  DBEH:{name:"酒桌话事人",axes:"张罗 · 健言 · 敬人 · 念旧",
+    portrait:"全场节奏都听你的，可你自己其实没喝几杯——指挥若定，滴酒未沾。",
+    moment:"你一句「来，都把杯满上」，八个人齐刷刷端起杯，连服务员都下意识站直了。",
+    lock:"把全场张罗得明明白白的人"},
+  DBEN:{name:"酒桌野生CEO",axes:"张罗 · 健言 · 敬人 · 尝新",
+    portrait:"没人发你工牌，但这顿饭从点菜到结账都是你在拍板。",
+    moment:"菜还没上齐，你已经默默定好了今晚去哪续摊、谁负责打车。",
+    lock:"天生把局当项目来运营的人"},
+  DBSH:{name:"闭桌不让人走",axes:"张罗 · 健言 · 自品 · 念旧",
+    portrait:"规矩你最熟，热情也最满，谁想早退都得先过你这一关。",
+    moment:"「再坐五分钟」说到第六遍，刚走到门口的人又被你拉回了座位。",
+    lock:"把「再喝一个」说得让人无法拒绝的人"},
+  DBSN:{name:"酒桌叛逆期",axes:"张罗 · 健言 · 自品 · 尝新",
+    portrait:"老规矩在你这儿统统重写，敬酒顺序？不存在的，开心就行。",
+    moment:"长辈刚要讲究座次，你一句「今天不论辈分，论酒量」全场笑场。",
+    lock:"偏要把酒桌玩出新规矩的人"},
+  DTEH:{name:"桌上隐形BOSS",axes:"张罗 · 善听 · 敬人 · 念旧",
+    portrait:"话不多，但每句都踩在点上，全桌的情绪你都悄悄照顾到了。",
+    moment:"你轻轻一句「老王今天辛苦了」，半桌人立刻心领神会跟着举杯。",
+    lock:"不动声色就稳住全场的人"},
+  DTEN:{name:"新世代温柔型",axes:"张罗 · 善听 · 敬人 · 尝新",
+    portrait:"你张罗着全场，却从不让任何人感到压力——温柔，但有掌控力。",
+    moment:"有人不胜酒力，你笑着递上一杯热茶：「以茶代酒，心意到了就行」。",
+    lock:"把体面和温柔都安排妥帖的人"},
+  DTSH:{name:"职场酒局精算师",axes:"张罗 · 善听 · 自品 · 念旧",
+    portrait:"谁该敬、敬到什么程度，你心里有一张精确到秒的时间表。",
+    moment:"领导杯子快空的那一瞬，你已经端着酒起身，时机分毫不差。",
+    lock:"把人情往来算得滴水不漏的人"},
+  DTSN:{name:"饭局氛围设计师",axes:"张罗 · 善听 · 自品 · 尝新",
+    portrait:"你操心的不是喝多少，而是这顿饭好不好玩、值不值得被记住。",
+    moment:"你提议玩个新梗，半小时后全桌都在笑同一个段子。",
+    lock:"把一顿饭办成一场体验的人"},
+  CBEH:{name:"酒桌副驾驶",axes:"安坐 · 健言 · 敬人 · 念旧",
+    portrait:"你不抢方向盘，但全程靠你补位，桌长缺的那一块永远是你接上。",
+    moment:"主人忙着应酬，你默默把冷场接住，话题稳稳地往下走。",
+    lock:"永远在关键时刻补上那一手的人"},
+  CBEN:{name:"饭局气氛GDP",axes:"安坐 · 健言 · 敬人 · 尝新",
+    portrait:"你一坐下，全桌的笑声产值直接翻倍——快乐由你贡献。",
+    moment:"场子刚有点冷，你一个段子下去，连隔壁桌都回过头来。",
+    lock:"一个人撑起半桌欢乐的人"},
+  CBSH:{name:"酒桌人形挡箭牌",axes:"安坐 · 健言 · 自品 · 念旧",
+    portrait:"朋友被劝酒，你二话不说挡在前面——「这杯我替他喝」。",
+    moment:"「来来来，冲我来」，你一仰头，把朋友从围攻里捞了出来。",
+    lock:"总在替人挡下那一杯的人"},
+  CBSN:{name:"桌长隐藏接班人",axes:"安坐 · 健言 · 自品 · 尝新",
+    portrait:"现在还坐在副驾，但只要桌长一声令下，你随时能顶上全场。",
+    moment:"桌长临时离席，你不慌不忙接过话头，场子稳得像没换过人。",
+    lock:"随时准备好接班的人"},
+  CTEH:{name:"桌上情绪稳定器",axes:"安坐 · 善听 · 敬人 · 念旧",
+    portrait:"你话不多，可桌上谁不开心你第一个察觉，悄悄就把气氛抚平了。",
+    moment:"两人话赶话快上头，你一句玩笑插进去，火苗瞬间就灭了。",
+    lock:"让一整桌人都松一口气的人"},
+  CTEN:{name:"桌中外交家",axes:"安坐 · 善听 · 敬人 · 尝新",
+    portrait:"陌生人坐满一桌，散场时却都加了你微信——你是天生的破冰者。",
+    moment:"左边聊不上话，你两句话就把双方的共同好友给牵了出来。",
+    lock:"能把一桌陌生人变成朋友的人"},
+  CTSH:{name:"暗中观察型",axes:"安坐 · 善听 · 自品 · 念旧",
+    portrait:"你安静地坐在角落，但全桌的暗流，你看得比谁都清楚。",
+    moment:"别人还在客套，你已经默默看懂了谁和谁今晚有故事。",
+    lock:"把一切尽收眼底却不声张的人"},
+  CTSN:{name:"第一次主桌不知所措的我",axes:"安坐 · 善听 · 自品 · 尝新",
+    portrait:"被推到主位的你，内心慌得一批，表面还得强装镇定。",
+    moment:"所有人等你起头致辞，你举着杯憋了三秒：「那个……大家随意啊！」",
+    lock:"硬着头皮也要把场撑下来的人"}
+};
+
+/* ============== 月相 SVG ============== */
+/* progress 0..1：弯月 → 满月。金色月面 + 背景色阴影盘偏移露出。 */
+function moonSVG(size, progress){
+  var r = size*0.40, cx = size/2, cy = size/2;
+  // 阴影盘从几乎全覆盖(细弯月) → 完全移开(满月)
+  var off = (0.10 + 0.90*progress) * (2*r);
+  var id = "g"+Math.round(progress*1000)+"_"+size;
+  return ''+
+  '<svg class="moon-svg" width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">'+
+    '<defs>'+
+      '<radialGradient id="face'+id+'" cx="42%" cy="38%" r="70%">'+
+        '<stop offset="0%" stop-color="#F4E4BC"/>'+
+        '<stop offset="55%" stop-color="#C9A961"/>'+
+        '<stop offset="100%" stop-color="#A8893F"/>'+
+      '</radialGradient>'+
+      '<clipPath id="clip'+id+'"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'"/></clipPath>'+
+    '</defs>'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+(r+2)+'" fill="none" stroke="rgba(201,169,97,.25)" stroke-width="1"/>'+
+    '<g clip-path="url(#clip'+id+')">'+
+      '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#face'+id+')"/>'+
+      '<circle cx="'+(cx - off)+'" cy="'+(cy-r*0.12)+'" r="'+r+'" fill="#0F0D0E"/>'+
+    '</g>'+
+  '</svg>';
+}
+
+/* ============== 16型卡通形象（参数化 SVG，每型一只「小桌长」）============== */
+/* 四轴各驱动一处可见特征；人人手举一杯五粮特曲金杯 */
+var CLOTH = {
+  DBEH:'#6E1A22', DBEN:'#28384B', DBSH:'#5A3320', DBSN:'#43293F',
+  DTEH:'#244035', DTEN:'#8A5A33', DTSH:'#34424E', DTSN:'#9A4A2A',
+  CBEH:'#2E4A4A', CBEN:'#9A6B2E', CBSH:'#5A1018', CBSN:'#34405E',
+  CTEH:'#3E5038', CTEN:'#1F4E50', CTSH:'#2A2F3A', CTSN:'#7A4A4A'
+};
+
+function avatarSVG(code, size){
+  var p = code.split('');
+  var dAx=p[0], tAx=p[1], eAx=p[2], hAx=p[3];
+  var cloth = CLOTH[code] || '#4A0F14';
+  var skin='#F1D3A9', hair='#2A2018', gold='#C9A961', goldL='#F0E0B0', goldD='#A8893F', wine='#4A0F14';
+  var uid = code;
+
+  // 五粮特曲金杯
+  function cup(cx,cy,sc){
+    sc = sc||1;
+    var w=10*sc, bh=13*sc, st=9*sc;
+    return ''+
+    '<path d="M'+(cx-w)+','+cy+' L'+(cx+w)+','+cy+' L'+(cx+w*0.62)+','+(cy+bh)+' Q'+cx+','+(cy+bh+3*sc)+' '+(cx-w*0.62)+','+(cy+bh)+' Z" fill="url(#cupg'+uid+')" stroke="'+goldD+'" stroke-width="1"/>'+
+    '<path d="M'+(cx-w*0.78)+','+(cy+3*sc)+' Q'+cx+','+(cy+8*sc)+' '+(cx+w*0.78)+','+(cy+3*sc)+'" fill="none" stroke="'+wine+'" stroke-width="'+(2.4*sc)+'" stroke-linecap="round" opacity=".8"/>'+
+    '<rect x="'+(cx-1.4*sc)+'" y="'+(cy+bh)+'" width="'+(2.8*sc)+'" height="'+(st*0.7)+'" fill="'+goldD+'"/>'+
+    '<ellipse cx="'+cx+'" cy="'+(cy+bh+st*0.7)+'" rx="'+(7*sc)+'" ry="'+(2.2*sc)+'" fill="'+gold+'"/>'+
+    '<circle cx="'+(cx-w*0.35)+'" cy="'+(cy+3*sc)+'" r="'+(1.6*sc)+'" fill="#fff" opacity=".85"/>';
+  }
+
+  var s = '<svg class="avatar-svg" width="'+size+'" height="'+size+'" viewBox="0 0 200 200">';
+  s += '<defs><linearGradient id="cupg'+uid+'" x1="0" y1="0" x2="0" y2="1">'+
+       '<stop offset="0" stop-color="'+goldL+'"/><stop offset="1" stop-color="'+goldD+'"/></linearGradient></defs>';
+
+  // 背景圆盘 + 金环（深底/米白卡上都能托住）
+  s += '<circle cx="100" cy="100" r="93" fill="rgba(247,243,236,0.05)"/>';
+  s += '<circle cx="100" cy="100" r="93" fill="none" stroke="'+gold+'" stroke-width="1.4" opacity=".45"/>';
+
+  // 肩/身
+  s += '<path d="M40,172 Q44,122 100,120 Q156,122 160,172 Z" fill="'+cloth+'"/>';
+  // 领口（H 立领盘扣 / N 现代圆领）
+  if(hAx==='H'){
+    s += '<path d="M88,122 L88,150 Q100,158 112,150 L112,122 Z" fill="'+cloth+'" stroke="'+gold+'" stroke-width="2"/>';
+    s += '<circle cx="100" cy="134" r="2.6" fill="'+gold+'"/><circle cx="100" cy="146" r="2.6" fill="'+gold+'"/>';
+  } else {
+    s += '<path d="M84,121 Q100,140 116,121" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="3"/>';
+  }
+  // 脖子 + 耳 + 头
+  s += '<rect x="92" y="104" width="16" height="18" rx="6" fill="'+skin+'"/>';
+  s += '<circle cx="64" cy="84" r="6" fill="'+skin+'"/><circle cx="136" cy="84" r="6" fill="'+skin+'"/>';
+  s += '<circle cx="100" cy="80" r="36" fill="'+skin+'"/>';
+  // 头发
+  s += '<path d="M62,72 Q60,40 100,38 Q140,40 138,72 Q120,56 100,56 Q80,56 62,72 Z" fill="'+hair+'"/>';
+  if(hAx==='N'){ // 现代刘海
+    s += '<path d="M60,68 Q92,46 140,66 Q112,52 60,68 Z" fill="'+hair+'"/>';
+  }
+  // 眼睛（E 笑眼 / S 沉静圆眼）
+  if(eAx==='E'){
+    s += '<path d="M82,80 Q89,72 96,80" fill="none" stroke="'+hair+'" stroke-width="3.6" stroke-linecap="round"/>';
+    s += '<path d="M104,80 Q111,72 118,80" fill="none" stroke="'+hair+'" stroke-width="3.6" stroke-linecap="round"/>';
+  } else {
+    s += '<circle cx="90" cy="82" r="3.8" fill="'+hair+'"/><circle cx="110" cy="82" r="3.8" fill="'+hair+'"/>';
+    s += '<circle cx="91.2" cy="83.2" r="1.1" fill="#fff" opacity=".8"/><circle cx="111.2" cy="83.2" r="1.1" fill="#fff" opacity=".8"/>';
+  }
+  // 腮红（敬人 E 更明显）
+  s += '<ellipse cx="76" cy="92" rx="8" ry="5" fill="#D87A6E" opacity="'+(eAx==='E'?0.55:0.26)+'"/>';
+  s += '<ellipse cx="124" cy="92" rx="8" ry="5" fill="#D87A6E" opacity="'+(eAx==='E'?0.55:0.26)+'"/>';
+  // 嘴（B 张嘴说笑 / T 抿嘴微笑）
+  if(tAx==='B'){
+    s += '<ellipse cx="100" cy="98" rx="6.5" ry="8" fill="#8A2A28"/>';
+    s += '<ellipse cx="100" cy="101" rx="3.6" ry="2.6" fill="#D86A66"/>';
+  } else {
+    s += '<path d="M90,97 Q100,105 110,97" fill="none" stroke="#7A3A36" stroke-width="3.4" stroke-linecap="round"/>';
+  }
+  // 头饰（H 瓜皮小帽 / N 圆框眼镜）
+  if(hAx==='H'){
+    s += '<path d="M62,60 Q100,24 138,60 Q100,46 62,60 Z" fill="'+wine+'"/>';
+    s += '<path d="M62,60 Q100,46 138,60" fill="none" stroke="'+gold+'" stroke-width="3"/>';
+    s += '<circle cx="100" cy="33" r="5.5" fill="'+gold+'"/>';
+  } else {
+    s += '<circle cx="90" cy="81" r="12" fill="none" stroke="'+goldD+'" stroke-width="2.4"/>';
+    s += '<circle cx="110" cy="81" r="12" fill="none" stroke="'+goldD+'" stroke-width="2.4"/>';
+    s += '<line x1="102" y1="81" x2="98" y2="81" stroke="'+goldD+'" stroke-width="2.4"/>';
+  }
+
+  // 手 + 杯（D 举杯招呼 / C 双手捧杯安坐）
+  if(dAx==='D'){
+    s += '<path d="M150,168 Q174,130 156,94" fill="none" stroke="'+cloth+'" stroke-width="17" stroke-linecap="round"/>';
+    s += '<circle cx="156" cy="92" r="9" fill="'+skin+'"/>';
+    s += cup(156, 66, 0.95);
+  } else {
+    s += cup(100, 144, 1.05);
+    s += '<circle cx="85" cy="152" r="9" fill="'+skin+'"/><circle cx="115" cy="152" r="9" fill="'+skin+'"/>';
+  }
+
+  s += '</svg>';
+  return s;
+}
+
+/* ============== 流程 ============== */
+var idx = 0;
+var counts = {D:0,C:0,B:0,T:0,E:0,S:0,H:0,N:0};
+
+var screens = {
+  cover: document.getElementById('cover'),
+  quiz: document.getElementById('quiz'),
+  result: document.getElementById('result')
+};
+
+function show(name){
+  Object.keys(screens).forEach(function(k){
+    var el = screens[k];
+    if(k===name){
+      el.classList.add('active');
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add('shown'); }); });
+    }else{
+      el.classList.remove('shown');
+      el.classList.remove('active');
+    }
+  });
+  window.scrollTo(0,0);
+}
+
+// 初始月亮 + 首屏淡入
+document.getElementById('coverMoonStage').innerHTML = moonSVG(96, 1);
+show('cover');
+
+document.getElementById('startBtn').addEventListener('click', function(){
+  idx = 0;
+  counts = {D:0,C:0,B:0,T:0,E:0,S:0,H:0,N:0};
+  show('quiz');
+  renderQuestion(false);
+});
+
+var qFade = document.getElementById('qFade');
+
+function renderQuestion(animate){
+  var q = QUESTIONS[idx];
+  var draw = function(){
+    document.getElementById('quizMoonStage').innerHTML = moonSVG(72, idx/QUESTIONS.length);
+    document.getElementById('qCounter').textContent = pad(idx+1)+' / '+pad(QUESTIONS.length);
+    document.getElementById('qAxis').textContent = q.axis;
+    document.getElementById('qStem').textContent = q.stem;
+    var oa = document.getElementById('optA'), ob = document.getElementById('optB');
+    oa.querySelector('.opt-t').textContent = q.a.t;
+    ob.querySelector('.opt-t').textContent = q.b.t;
+    oa.classList.remove('pick'); ob.classList.remove('pick');
+    // 进入动画
+    qFade.classList.add('in-prep');
+    requestAnimationFrame(function(){
+      qFade.classList.remove('out');
+      qFade.classList.remove('in-prep');
+    });
+  };
+  if(animate){
+    qFade.classList.add('out');
+    setTimeout(draw, 320);
+  }else{
+    draw();
+  }
+}
+
+function pad(n){ return n<10 ? '0'+n : ''+n; }
+
+function choose(opt, el){
+  el.classList.add('pick');
+  counts[opt.v]++;
+  setTimeout(function(){
+    idx++;
+    if(idx >= QUESTIONS.length){
+      finish();
+    }else{
+      renderQuestion(true);
+    }
+  }, 260);
+}
+
+document.getElementById('optA').addEventListener('click', function(){ choose(QUESTIONS[idx].a, this); });
+document.getElementById('optB').addEventListener('click', function(){ choose(QUESTIONS[idx].b, this); });
+
+function finish(){
+  // 平票取前者：D>C, B>T, E>S, H>N
+  var code =
+    (counts.D >= counts.C ? 'D':'C') +
+    (counts.B >= counts.T ? 'B':'T') +
+    (counts.E >= counts.S ? 'E':'S') +
+    (counts.H >= counts.N ? 'H':'N');
+  var t = TYPES[code];
+
+  document.getElementById('cardMoonStage').innerHTML = avatarSVG(code, 168);
+  document.getElementById('cardCode').textContent = code;
+  document.getElementById('cardName').textContent = t.name;
+  document.getElementById('cardAxes').textContent = t.axes;
+  document.getElementById('cardPortrait').textContent = t.portrait;
+  document.getElementById('cardMoment').textContent = t.moment;
+  document.getElementById('cardLock').innerHTML =
+    t.lock + '，<br>值得这更好的一杯。' +
+    '<span class="grains card-grains"><i></i><i></i><i></i><i></i><i></i></span>' +
+    '<span class="small">五 粮 成 酒 · 一 桌 成 圆</span>';
+
+  show('result');
+}
+
+document.getElementById('retryBtn').addEventListener('click', function(){
+  show('cover');
+});
+
+/* ============== 星空背景 ============== */
+(function(){
+  var c = document.getElementById('stars'), ctx = c.getContext('2d');
+  var stars = [];
+  function resize(){
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    stars = [];
+    var n = Math.min(70, Math.floor(c.width*c.height/14000));
+    for(var i=0;i<n;i++){
+      stars.push({ x:Math.random()*c.width, y:Math.random()*c.height*0.7,
+        r:Math.random()*1.3+0.2, a:Math.random()*0.6+0.2, s:Math.random()*0.015+0.004, p:Math.random()*Math.PI*2 });
+    }
+  }
+  function tick(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(var i=0;i<stars.length;i++){
+      var st = stars[i];
+      st.p += st.s;
+      var alpha = st.a * (0.55 + 0.45*Math.sin(st.p));
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(226,201,136,'+alpha.toFixed(3)+')';
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  tick();
+})();
+</script>
+</body>
+</html>
