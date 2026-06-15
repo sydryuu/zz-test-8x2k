@@ -925,13 +925,22 @@ function renderResultCanvas(code, t){
 
 (function(){
   var saveBtn=document.getElementById('saveBtn'), overlay=document.getElementById('saveOverlay');
-  var img=document.getElementById('saveImg'), dl=document.getElementById('saveDownload');
+  var img=document.getElementById('saveImg'), dl=document.getElementById('saveDownload'), hint=document.getElementById('saveHint');
+  var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints>0);
   saveBtn.addEventListener('click', function(){
     if(!currentCode) return;
     saveBtn.disabled=true; saveBtn.textContent='生 成 中…';
     renderResultCanvas(currentCode, TYPES[currentCode]).then(function(cv){
       var url=cv.toDataURL('image/png');
       img.src=url; dl.href=url;
+      if(isTouch){
+        // 手机：走"保存到相册"，藏掉会生成文件的下载按钮
+        hint.innerHTML='👇 <b>长按下方图片</b> → 保存到相册<br><span style="font-size:13px;opacity:.72">再用微信「照片」发给朋友（别用「文件」发）</span>';
+        dl.style.display='none';
+      } else {
+        hint.innerHTML='<b>右键图片</b> → 图片另存为<br><span style="font-size:13px;opacity:.72">发到群里时选「图片」，别选「文件」</span>';
+        dl.style.display='';
+      }
       overlay.classList.add('show');
       saveBtn.disabled=false; saveBtn.textContent='保 存 结 果 图 片';
     }).catch(function(){
