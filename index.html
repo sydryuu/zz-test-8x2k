@@ -283,8 +283,7 @@ body{
     <div class="q-body">
       <div class="q-fade" id="qFade">
         <div class="q-stem" id="qStem"></div>
-        <button class="opt" id="optA"><span class="tag">A</span><span class="opt-t"></span></button>
-        <button class="opt" id="optB"><span class="tag">B</span><span class="opt-t"></span></button>
+        <div id="qOpts"></div>
       </div>
     </div>
   </section>
@@ -322,31 +321,68 @@ body{
 
 <script>
 /* ============== 数据 ============== */
+/* 12 题升级版（每维3题·每题4选项，程度档计分：强=±2 / 弱=±1）。opts 顺序 = A/B/C/D */
 var QUESTIONS = [
-  { axis:"张罗 / 安坐", stem:"一桌人刚坐下，气氛还有点僵——",
-    a:{t:"我先开口招呼大家，张罗着倒酒上菜", v:"D"},
-    b:{t:"我等别人起头，安安静静先坐着", v:"C"} },
-  { axis:"张罗 / 安坐", stem:"席间有人杯子空了——",
-    a:{t:"我眼疾手快马上给续上，顺便招呼一圈", v:"D"},
-    b:{t:"我注意到了，但一般等主人来添", v:"C"} },
-  { axis:"健言 / 善听", stem:"轮到我说祝酒词——",
-    a:{t:"张口就来，想到啥说啥，图个痛快", v:"B"},
-    b:{t:"我会先想想措辞，照顾到在场每个人", v:"T"} },
-  { axis:"健言 / 善听", stem:"旁边的人喝多了开始说胡话——",
-    a:{t:"我直接怼回去，有啥说啥", v:"B"},
-    b:{t:"我打个圆场，悄悄把话题岔开", v:"T"} },
-  { axis:"敬人 / 自品", stem:"一场饭局下来，我最在意的是——",
-    a:{t:"大家聊得开不开心、谁今天情绪不对", v:"E"},
-    b:{t:"这顿饭办成了没、该敬的人敬到没", v:"S"} },
-  { axis:"敬人 / 自品", stem:"饭局上有人闹了点小别扭——",
-    a:{t:"我心里一直惦记着，想找机会缓和", v:"E"},
-    b:{t:"这是小事，把整桌的局面顾好更重要", v:"S"} },
-  { axis:"念旧 / 尝新", stem:"说到酒桌规矩——",
-    a:{t:"长幼有序、先敬长辈，老规矩该守还得守", v:"H"},
-    b:{t:"规矩是死的人是活的，开心最重要", v:"N"} },
-  { axis:"念旧 / 尝新", stem:"让我组个局，我会——",
-    a:{t:"找家有年代感的老馆子，按老路子来", v:"H"},
-    b:{t:"整点新花样，密室、围炉、露营都行", v:"N"} }
+  { axis:"张罗 / 安坐", stem:"一桌人刚坐下，气氛还有点僵，你通常会——", opts:[
+    {t:"立马起身招呼大家落座、张罗倒酒上菜", v:"D", p:2},
+    {t:"主动找话头打破沉默，但不抢着张罗", v:"D", p:1},
+    {t:"等有人起头，我再顺着搭把手", v:"C", p:1},
+    {t:"安静坐着，看大家怎么安排", v:"C", p:2} ]},
+  { axis:"张罗 / 安坐", stem:"席间需要有人点菜/续茶/招呼服务员，你——", opts:[
+    {t:"基本都是我在张罗，眼观六路", v:"D", p:2},
+    {t:"我会主动管一两样，比如点菜", v:"D", p:1},
+    {t:"别人忙不过来时我才搭手", v:"C", p:1},
+    {t:"一般等主人或张罗的人来弄", v:"C", p:2} ]},
+  { axis:"张罗 / 安坐", stem:"饭局散场要结账、安排送人，你多半——", opts:[
+    {t:"我来拍板，买单、叫车一手安排", v:"D", p:2},
+    {t:"我会提议怎么弄，但听大家意见", v:"D", p:1},
+    {t:"跟着大家的决定走，帮忙递个话", v:"C", p:1},
+    {t:"默默等结果，让张罗的人定", v:"C", p:2} ]},
+  { axis:"健言 / 善听", stem:"轮到你说几句/敬酒，你——", opts:[
+    {t:"张口就来，想到啥说啥图个痛快", v:"B", p:2},
+    {t:"简单几句真心话，不绕弯", v:"B", p:1},
+    {t:"会斟酌一下，照顾在场的人", v:"T", p:1},
+    {t:"字斟句酌，确保谁都不被冷落", v:"T", p:2} ]},
+  { axis:"健言 / 善听", stem:"桌上有人观点你不认同，你会——", opts:[
+    {t:"当场直说，有啥讲啥", v:"B", p:2},
+    {t:"委婉表达不同意，但也说出来", v:"B", p:1},
+    {t:"点到为止，不让场面尴尬", v:"T", p:1},
+    {t:"先不说，换个私下场合再聊", v:"T", p:2} ]},
+  { axis:"健言 / 善听", stem:"有人在桌上讲了个冷场的话，你——", opts:[
+    {t:"直接调侃回去，逗大家笑", v:"B", p:2},
+    {t:"接一句活跃下气氛", v:"B", p:1},
+    {t:"默默打个圆场把话题带开", v:"T", p:1},
+    {t:"不动声色照顾那人情绪，悄悄转移", v:"T", p:2} ]},
+  { axis:"敬人 / 自品", stem:"一场饭局下来，你最在意的是——", opts:[
+    {t:"每个人有没有被照顾到、聊得开不开心", v:"E", p:2},
+    {t:"重要的人是不是敬到了、感受好", v:"E", p:1},
+    {t:"这顿饭该办的事办成了没", v:"S", p:1},
+    {t:"整桌局面顺不顺、有没有掉链子", v:"S", p:2} ]},
+  { axis:"敬人 / 自品", stem:"席间有人闹了点小别扭，你——", opts:[
+    {t:"心里一直惦记，非得找机会缓和不可", v:"E", p:2},
+    {t:"会留意，找个台阶让双方下", v:"E", p:1},
+    {t:"小事，先把整桌气氛稳住要紧", v:"S", p:1},
+    {t:"不掺和情绪，顾好大局就行", v:"S", p:2} ]},
+  { axis:"敬人 / 自品", stem:"安排座位时你优先考虑——", opts:[
+    {t:"谁和谁投缘、聊得来，让大家舒服", v:"E", p:2},
+    {t:"让重要的人坐得受尊重又自在", v:"E", p:1},
+    {t:"按辈分职位排，不出错", v:"S", p:1},
+    {t:"怎么坐有利于把事谈成", v:"S", p:2} ]},
+  { axis:"念旧 / 尝新", stem:"说到酒桌规矩，你觉得——", opts:[
+    {t:"长幼有序、先敬长辈，老规矩必须守", v:"H", p:2},
+    {t:"基本规矩还是要讲的", v:"H", p:1},
+    {t:"看场合，熟人之间随意点没事", v:"N", p:1},
+    {t:"规矩是死的人是活的，开心最重要", v:"N", p:2} ]},
+  { axis:"念旧 / 尝新", stem:"让你组个局，你会选——", opts:[
+    {t:"有年代感的老馆子，按老路子来", v:"H", p:2},
+    {t:"稳妥经典的地方，大家都熟", v:"H", p:1},
+    {t:"偶尔试试新店、新玩法", v:"N", p:1},
+    {t:"整点新花样，露营、围炉、密室都行", v:"N", p:2} ]},
+  { axis:"念旧 / 尝新", stem:"敬酒的方式，你倾向——", opts:[
+    {t:"该走的流程一个不少，郑重其事", v:"H", p:2},
+    {t:"照老礼来，但不必太拘谨", v:"H", p:1},
+    {t:"简化一下，意思到了就行", v:"N", p:1},
+    {t:"自创新玩法，碰个杯说句俏皮话", v:"N", p:2} ]}
 ];
 
 var TYPES = {
@@ -574,6 +610,7 @@ document.getElementById('startBtn').addEventListener('click', function(){
 });
 
 var qFade = document.getElementById('qFade');
+var locked = false; // 切题过渡期间锁住，防止连点多记分
 
 function renderQuestion(animate){
   var q = QUESTIONS[idx];
@@ -582,10 +619,19 @@ function renderQuestion(animate){
     document.getElementById('qCounter').textContent = pad(idx+1)+' / '+pad(QUESTIONS.length);
     document.getElementById('qAxis').textContent = q.axis;
     document.getElementById('qStem').textContent = q.stem;
-    var oa = document.getElementById('optA'), ob = document.getElementById('optB');
-    oa.querySelector('.opt-t').textContent = q.a.t;
-    ob.querySelector('.opt-t').textContent = q.b.t;
-    oa.classList.remove('pick'); ob.classList.remove('pick');
+    // 生成 4 个选项（A/B/C/D）
+    var box = document.getElementById('qOpts');
+    box.innerHTML = '';
+    var TAGS = ['A','B','C','D'];
+    q.opts.forEach(function(opt, i){
+      var btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.innerHTML = '<span class="tag">'+TAGS[i]+'</span><span class="opt-t"></span>';
+      btn.querySelector('.opt-t').textContent = opt.t;
+      btn.addEventListener('click', function(){ choose(opt, btn); });
+      box.appendChild(btn);
+    });
+    locked = false; // 新题就绪，解锁
     // 进入动画
     qFade.classList.add('in-prep');
     requestAnimationFrame(function(){
@@ -604,8 +650,10 @@ function renderQuestion(animate){
 function pad(n){ return n<10 ? '0'+n : ''+n; }
 
 function choose(opt, el){
+  if(locked) return; // 过渡期间锁住，防连点多记分
+  locked = true;
   el.classList.add('pick');
-  counts[opt.v]++;
+  counts[opt.v] += opt.p;   // 程度档计分：强=2 / 弱=1
   setTimeout(function(){
     idx++;
     if(idx >= QUESTIONS.length){
@@ -615,9 +663,6 @@ function choose(opt, el){
     }
   }, 260);
 }
-
-document.getElementById('optA').addEventListener('click', function(){ choose(QUESTIONS[idx].a, this); });
-document.getElementById('optB').addEventListener('click', function(){ choose(QUESTIONS[idx].b, this); });
 
 function finish(){
   // 平票取前者：D>C, B>T, E>S, H>N
