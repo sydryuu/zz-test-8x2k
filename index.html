@@ -19,6 +19,9 @@
 <meta name="twitter:description" content="12 道题，测出你是哪一型酒桌人格。">
 <meta name="twitter:image" content="./og-cover.png">
 
+<!-- Umami 云版统计（defer，国外服务器，加载失败也不影响 H5）-->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="39239c88-dbf5-42ea-b09e-d163c66ded7a"></script>
+
 <style>
 :root{
   --ink:#0F0D0E;        /* 深墨底 */
@@ -695,6 +698,17 @@ var idx = 0;
 var currentCode = null;
 var counts = {D:0,C:0,B:0,T:0,E:0,S:0,H:0,N:0};
 
+/* ===== Umami 埋点（全程容错：未加载/出错都不影响 H5）===== */
+var testStarted = false, testCompleted = false, abandonSent = false;
+function tk(name, data){ try{ if(window.umami && umami.track) umami.track(name, data); }catch(e){} }
+// 中途放弃：页面隐藏且已开始未完成时上报一次（含答到第几题）
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='hidden' && testStarted && !testCompleted && !abandonSent){
+    abandonSent = true;
+    tk('test_abandon', { at_question: idx+1 });
+  }
+});
+
 var screens = {
   cover: document.getElementById('cover'),
   quiz: document.getElementById('quiz'),
@@ -722,6 +736,8 @@ show('cover');
 document.getElementById('startBtn').addEventListener('click', function(){
   idx = 0;
   counts = {D:0,C:0,B:0,T:0,E:0,S:0,H:0,N:0};
+  testStarted = true; testCompleted = false; abandonSent = false;
+  tk('test_start');
   show('quiz');
   renderQuestion(false);
 });
@@ -790,6 +806,8 @@ function finish(){
     (counts.H >= counts.N ? 'H':'N');
   var t = TYPES[code];
   currentCode = code;   // 供"保存结果图"使用
+  testCompleted = true;
+  tk('test_complete', { type: t.name });   // 带型名 → 后台可看各型分布
 
   document.getElementById('cardMoonStage').innerHTML = avatarSVG(code, 168);
   document.getElementById('cardCode').textContent = code;
@@ -929,6 +947,7 @@ function renderResultCanvas(code, t){
   var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints>0);
   saveBtn.addEventListener('click', function(){
     if(!currentCode) return;
+    tk('share_click', { type: TYPES[currentCode].name });
     saveBtn.disabled=true; saveBtn.textContent='生 成 中…';
     renderResultCanvas(currentCode, TYPES[currentCode]).then(function(cv){
       var url=cv.toDataURL('image/png');
